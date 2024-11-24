@@ -12,7 +12,8 @@ from threading import Thread
 # Define WebSocket URL and other constants
 COINBASE_WS_URL = "wss://ws-feed.exchange.coinbase.com"
 product_ids = ["ETH-USD"]
-MAX_ROWS = 5000
+MAX_ROWS = 60000
+period = 15000
 columns = ["time", "product_id", "price", "shares", "side"]
 market_data = pd.DataFrame(columns=columns)
 
@@ -78,24 +79,24 @@ class CoinbaseWebSocket(Thread):
         if self.ws:
             self.ws.close()
 
-def calculate_pivot(data, period=5000):
-    pivot_point = (data['price'].tail(MAX_ROWS).max() + data['price'].tail(MAX_ROWS).min() + data['price'].tail(MAX_ROWS).iloc[-1]) / 3
+def calculate_pivot(data, period):
+    pivot_point = (data['price'].tail(period).max() + data['price'].tail(period).min() + data['price'].tail(period).iloc[-1]) / 3
     return pivot_point
 
-def calculate_resistance1(pivot, data, period=5000):
-    resistance1 = (pivot*2) - data['price'].tail(MAX_ROWS).min()
+def calculate_resistance1(pivot, data, period):
+    resistance1 = (pivot*2) - data['price'].tail(period).min()
     return resistance1
 
-def calculate_resistance2(pivot, data, period=5000):
-    resistance2 = (pivot + (data['price'].tail(MAX_ROWS).max() - data['price'].tail(MAX_ROWS).min()))
+def calculate_resistance2(pivot, data, period):
+    resistance2 = (pivot + (data['price'].tail(period).max() - data['price'].tail(period).min()))
     return resistance2
 
-def calculate_support1(pivot, data, period=5000):
-    support1 = (pivot*2) - data['price'].tail(MAX_ROWS).max()
+def calculate_support1(pivot, data, period):
+    support1 = (pivot*2) - data['price'].tail(period).max()
     return support1
 
-def calculate_support2(pivot, data, period=5000):
-    support2 = (pivot - (data['price'].tail(MAX_ROWS).max() - data['price'].tail(MAX_ROWS).min()))
+def calculate_support2(pivot, data, period):
+    support2 = (pivot - (data['price'].tail(period).max() - data['price'].tail(period).min()))
     return support2
 
 
@@ -140,6 +141,10 @@ def plot_graph():
             r2 = calculate_resistance2(pivot, market_data)
             s2 = calculate_support2(pivot, market_data)
 
+            ohlc_data["cumulative_price_volume"] = (ohlc_data["close"] * ohlc_data["volume"]).cumsum()
+            ohlc_data["cumulative_volume"] = ohlc_data["volume"].cumsum()
+            ohlc_data["VWAP"] = ohlc_data["cumulative_price_volume"] / ohlc_data["cumulative_volume"]
+
             # Prepare the plot
             fig, ax = plt.subplots(figsize=(10, 6))
             ax.set_facecolor("#2E2E2E")
@@ -157,6 +162,8 @@ def plot_graph():
             ax.axhline(r2, color='#c21d00', linestyle='-', linewidth=2, label="Resistance 2")
             ax.axhline(s2, color='#207e02', linestyle='-', linewidth=2, label="Support 2")
 
+            ax1.plot(ohlc_data["time"], ohlc_data["VWAP"], label="VWAP", color="purple", linewidth=1.5, linestyle="-")
+
             ax.text(x=ohlc_data["time"].iloc[0], y=r1, s=f'{r1:.2f}', color='white', fontsize=10, va='center',
                      ha='left', bbox=dict(boxstyle='round,pad=0.3', edgecolor='blue', facecolor='#2E2E2E'))
             ax.text(x=ohlc_data["time"].iloc[0], y=s1, s=f'{s1:.2f}', color='white', fontsize=10, va='center',
@@ -164,8 +171,8 @@ def plot_graph():
             ax.text(x=ohlc_data["time"].iloc[0], y=pivot, s=f'{pivot:.2f}', color='white', fontsize=10, va='center',
                      ha='left', bbox=dict(boxstyle='round,pad=0.3', edgecolor='blue', facecolor='#2E2E2E'))
 
-            ax.set_xlabel("Time", fontsize=10, color="white")
-            ax.set_ylabel("Price (USD)", fontsize=10, color="white")
+            ax.set_xlabel("Time", fontsize=10, color="black")
+            ax.set_ylabel("Price (USD)", fontsize=10, color="black")
             #ax.set_ylabel("Volume", fontsize=10, color="white")
             ax.xaxis.set_major_formatter(plt.matplotlib.dates.DateFormatter("%H:%M:%S"))
             plt.xticks(rotation=45, color="white")
