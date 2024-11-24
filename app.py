@@ -164,6 +164,12 @@ def plot_graph():
             ax.text(x=ohlc_data["time"].iloc[0], y=pivot, s=f'{pivot:.2f}', color='white', fontsize=10, va='center',
                      ha='left', bbox=dict(boxstyle='round,pad=0.3', edgecolor='blue', facecolor='#2E2E2E'))
 
+            ax.set_xlabel("Time", fontsize=10, color="white")
+            ax.set_ylabel("Price (USD)", fontsize=10, color="white")
+            #ax.set_ylabel("Volume", fontsize=10, color="white")
+            ax.xaxis.set_major_formatter(plt.matplotlib.dates.DateFormatter("%H:%M:%S"))
+            plt.xticks(rotation=45, color="white")
+
             # Update the chart in the placeholder
             chart_placeholder.pyplot(fig)
 
