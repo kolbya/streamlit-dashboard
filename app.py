@@ -135,11 +135,11 @@ def plot_graph():
             ohlc_data.reset_index(inplace=True)
             ohlc_data["time"] = ohlc_data["time"].map(date2num)
 
-            pivot = calculate_pivot(market_data)
-            r1 = calculate_resistance1(pivot, market_data)
-            s1 = calculate_support1(pivot, market_data)
-            r2 = calculate_resistance2(pivot, market_data)
-            s2 = calculate_support2(pivot, market_data)
+            pivot = calculate_pivot(market_data, period)
+            r1 = calculate_resistance1(pivot, market_data, period)
+            s1 = calculate_support1(pivot, market_data, period)
+            r2 = calculate_resistance2(pivot, market_data, period)
+            s2 = calculate_support2(pivot, market_data, period)
 
             ohlc_data["cumulative_price_volume"] = (ohlc_data["close"] * ohlc_data["volume"]).cumsum()
             ohlc_data["cumulative_volume"] = ohlc_data["volume"].cumsum()
