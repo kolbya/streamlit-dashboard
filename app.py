@@ -162,7 +162,7 @@ def plot_graph():
             ax.axhline(r2, color='#c21d00', linestyle='-', linewidth=2, label="Resistance 2")
             ax.axhline(s2, color='#207e02', linestyle='-', linewidth=2, label="Support 2")
 
-            ax1.plot(ohlc_data["time"], ohlc_data["VWAP"], label="VWAP", color="purple", linewidth=1.5, linestyle="-")
+            ax.plot(ohlc_data["time"], ohlc_data["VWAP"], label="VWAP", color="purple", linewidth=1.5, linestyle="-")
 
             ax.text(x=ohlc_data["time"].iloc[0], y=r1, s=f'{r1:.2f}', color='white', fontsize=10, va='center',
                      ha='left', bbox=dict(boxstyle='round,pad=0.3', edgecolor='blue', facecolor='#2E2E2E'))
